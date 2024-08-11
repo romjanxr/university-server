@@ -1,31 +1,34 @@
 // 1. Create an interface representing a document in MongoDB.
 
-export type Guardian = {
+import { Model } from 'mongoose';
+
+export type TGuardian = {
   fatherName: string;
   fatherOccupation: string;
   fatherContactNo: string;
   motherName: string;
-  motherOccuPation: string;
+  motherOccupation: string;
   motherContactNo: string;
 };
 
-export type Username = {
+export type TUsername = {
   firstName: string;
   middleName: string;
   lastName: string;
 };
 
-export type localGuardian = {
+export type TLocalGuardian = {
   name: string;
   occupation: string;
   contactNo: string;
   address: string;
 };
 
-export type Student = {
+export type TStudent = {
   id: string;
-  name: Username;
-  gender: 'male' | 'female';
+  password: string;
+  name: TUsername;
+  gender: 'male' | 'female' | 'other';
   dateOfBirth?: string;
   email: string;
   contactNo: string;
@@ -33,8 +36,26 @@ export type Student = {
   bloodGroup?: 'A+' | 'A-' | 'B+' | 'B-' | 'O+' | 'O-' | 'AB+' | 'AB-';
   presentAddress: string;
   permanentAddress: string;
-  guardian: Guardian;
-  localGuardian: localGuardian;
+  guardian: TGuardian;
+  localGuardian: TLocalGuardian;
   profileImg?: string;
   isActive: 'active' | 'blocked';
+  isDeleted: boolean;
 };
+
+/* For creating static */
+export interface TStudentModel extends Model<TStudent> {
+  isUserExists(id: string): Promise<TStudent | null>;
+}
+
+/* For Crating  instance */
+
+// export type TStudentMethods = {
+//   isUserExists(id: string): Promise<TStudent | null>;
+// };
+
+// export type TStudentModel = Model<
+//   TStudent,
+//   Record<string, never>,
+//   TStudentMethods
+// >;
