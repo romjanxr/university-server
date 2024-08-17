@@ -1,4 +1,4 @@
-import { Document, Schema, model } from 'mongoose';
+import { Schema, model } from 'mongoose';
 import {
   TGuardian,
   TLocalGuardian,
@@ -7,8 +7,6 @@ import {
   TUsername,
 } from './student.interface';
 import validator from 'validator';
-import bcrypt from 'bcrypt';
-import config from '../../config';
 
 // 2. Create a Schema corresponding to the document interface.
 
@@ -59,13 +57,21 @@ const localGuardian = new Schema<TLocalGuardian>({
 
 const studentSchema = new Schema<TStudent, TStudentModel>(
   {
-    id: { type: String, required: true, unique: true },
-    password: {
+    id: {
       type: String,
-      required: [true, 'Password is required'],
-      maxlength: [20, 'Password can not exceed 20 characters'],
+      required: true,
+      unique: true,
     },
-    name: { type: userNameSchema, required: [true, 'name is required'] },
+    user: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      unique: true,
+      ref: 'User',
+    },
+    name: {
+      type: userNameSchema,
+      required: [true, 'name is required'],
+    },
     gender: {
       type: String,
       enum: {
@@ -81,8 +87,14 @@ const studentSchema = new Schema<TStudent, TStudentModel>(
       unique: true,
       validate: { validator: (value: string) => validator.isEmail(value) },
     },
-    contactNo: { type: String, required: true },
-    emergencyContactNo: { type: String, required: true },
+    contactNo: {
+      type: String,
+      required: true,
+    },
+    emergencyContactNo: {
+      type: String,
+      required: true,
+    },
     bloodGroup: {
       type: String,
       enum: {
@@ -90,8 +102,14 @@ const studentSchema = new Schema<TStudent, TStudentModel>(
         message: '{VALUE} is not a valid option',
       },
     },
-    presentAddress: { type: String, required: true },
-    permanentAddress: { type: String, required: true },
+    presentAddress: {
+      type: String,
+      required: true,
+    },
+    permanentAddress: {
+      type: String,
+      required: true,
+    },
     guardian: {
       type: gurdianSchema,
       required: [true, 'Guardian is required'],
@@ -100,11 +118,8 @@ const studentSchema = new Schema<TStudent, TStudentModel>(
       type: localGuardian,
       required: [true, 'Local Guardian is required'],
     },
-    profileImg: { type: String },
-    isActive: {
+    profileImg: {
       type: String,
-      enum: ['active', 'blocked'],
-      default: 'active',
     },
     isDeleted: {
       type: Boolean,
@@ -121,24 +136,6 @@ const studentSchema = new Schema<TStudent, TStudentModel>(
 // Virtual
 studentSchema.virtual('fullName').get(function () {
   return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
-});
-
-// pre save middleware / hook
-studentSchema.pre('save', async function (next) {
-  // console.log(this, 'pre hook : we will save data');
-  const user = this as Document & TStudent;
-  // hashing password and prepare data for save
-  user.password = await bcrypt.hash(
-    user.password,
-    Number(config.bcrypt_saltRounds),
-  );
-  next();
-});
-
-// Post save middleware / hook
-studentSchema.post('save', function (doc, next) {
-  doc.password = '';
-  next();
 });
 
 // query middleware
@@ -162,13 +159,6 @@ studentSchema.statics.isUserExists = async function (id: string) {
   const existingUser = await Student.findOne({ id });
   return existingUser;
 };
-
-// Custom instance method
-// studentSchema.methods.isUserExists = async (id: string) => {
-//   const existingUser = await Student.findOne({ id });
-
-//   return existingUser;
-// };
 
 // 3. Create a Model.
 export const Student = model<TStudent, TStudentModel>('Student', studentSchema);
