@@ -80,7 +80,7 @@ const studentSchema = new Schema<TStudent, TStudentModel>(
       },
       required: [true, 'The gender field is required'],
     },
-    dateOfBirth: String,
+    dateOfBirth: Date,
     email: {
       type: String,
       required: true,
@@ -120,6 +120,10 @@ const studentSchema = new Schema<TStudent, TStudentModel>(
     },
     profileImg: {
       type: String,
+    },
+    admissionSemester: {
+      type: Schema.Types.ObjectId,
+      ref: 'AcademicSemester',
     },
     isDeleted: {
       type: Boolean,
