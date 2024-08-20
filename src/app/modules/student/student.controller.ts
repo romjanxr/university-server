@@ -40,8 +40,10 @@ const deleteStudent: RequestHandler = catchAsync(async (req, res) => {
 
 const updateStudent: RequestHandler = catchAsync(async (req, res) => {
   const { studentId } = req.params;
-  const updatedData = req.body;
+  const { student: updatedData } = req.body;
+
   console.log(updatedData);
+
   const result = await StudentServices.updateStudentOnDB(
     studentId,
     updatedData,

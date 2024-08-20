@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import AppError from '../errors/AppError';
 
 const globalErrorHandler = (
   err: unknown,
@@ -6,7 +7,7 @@ const globalErrorHandler = (
   res: Response,
   next: NextFunction,
 ) => {
-  const statusCode = 500;
+  const statusCode = err instanceof AppError ? err.statusCode : 500;
   const message = err instanceof Error ? err.message : 'Something went wrong';
   res.status(statusCode).json({
     success: false,
